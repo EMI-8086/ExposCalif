@@ -1,37 +1,37 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { MateriaRepository } from '../repositories/materiaRepository';
-import { MateriaService } from '../services/materiaService';
+import { ExposicionRepository } from '../repositories/exposicionRepository';
+import { ExposicionService } from '../services/exposicionesService';
 
-export class MateriaController {
-  async list(supabaseClient: SupabaseClient, request: FastifyRequest, reply: FastifyReply) {
-    const repository = new MateriaRepository(supabaseClient);
-    const service = new MateriaService(repository);
+export class ExposicionController {
+  async listByEquipo(supabaseClient: SupabaseClient, request: FastifyRequest, reply: FastifyReply) {
+    const repository = new ExposicionRepository(supabaseClient);
+    const service = new ExposicionService(repository);
     const query = request.query as any;
+    const equipoId = parseInt(query.equipoId);
     const page = parseInt(query.page || '0');
     const size = parseInt(query.size || '10');
-    const nombre = query.nombre;
-    const result = await service.list(page, size, nombre);
+    const result = await service.listByEquipo(equipoId, page, size);
     reply.send(result);
   }
 
   async getById(supabaseClient: SupabaseClient, request: FastifyRequest, reply: FastifyReply) {
-    const repository = new MateriaRepository(supabaseClient);
-    const service = new MateriaService(repository);
+    const repository = new ExposicionRepository(supabaseClient);
+    const service = new ExposicionService(repository);
     const params = request.params as any;
     const id = Number(params.id);
     try {
-      const materia = await service.getById(id);
-      reply.send(materia);
+      const exposicion = await service.getById(id);
+      reply.send(exposicion);
     } catch (error: any) {
       reply.status(404).send({ error: error.message });
     }
   }
 
   async create(supabaseClient: SupabaseClient, request: FastifyRequest, reply: FastifyReply) {
-    const repository = new MateriaRepository(supabaseClient);
-    const service = new MateriaService(repository);
-    const body = request.body as { clave_materia: string; nombre_materia: string };
+    const repository = new ExposicionRepository(supabaseClient);
+    const service = new ExposicionService(repository);
+    const body = request.body as { titulo: string; fecha_exposicion: string; id_equipo: number; rubrica?: any };
     try {
       const nueva = await service.create(body);
       reply.status(201).send(nueva);
@@ -41,11 +41,11 @@ export class MateriaController {
   }
 
   async update(supabaseClient: SupabaseClient, request: FastifyRequest, reply: FastifyReply) {
-    const repository = new MateriaRepository(supabaseClient);
-    const service = new MateriaService(repository);
+    const repository = new ExposicionRepository(supabaseClient);
+    const service = new ExposicionService(repository);
     const params = request.params as any;
     const id = Number(params.id);
-    const body = request.body as { clave_materia?: string; nombre_materia?: string };
+    const body = request.body as { titulo?: string; fecha_exposicion?: string; rubrica?: any };
     try {
       const updated = await service.update(id, body);
       reply.send(updated);
@@ -55,8 +55,8 @@ export class MateriaController {
   }
 
   async delete(supabaseClient: SupabaseClient, request: FastifyRequest, reply: FastifyReply) {
-    const repository = new MateriaRepository(supabaseClient);
-    const service = new MateriaService(repository);
+    const repository = new ExposicionRepository(supabaseClient);
+    const service = new ExposicionService(repository);
     const params = request.params as any;
     const id = Number(params.id);
     try {
