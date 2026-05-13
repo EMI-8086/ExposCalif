@@ -1,15 +1,15 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { MateriaService } from '../services/materiaService';
+import { GrupoService } from '../services/grupoService';
 
-export class MateriaController {
-  constructor(private materiaService: MateriaService) {}
+export class GrupoController {
+  constructor(private grupoService: GrupoService) {}
 
-  async list(request: FastifyRequest, reply: FastifyReply) {
+  async listByMateria(request: FastifyRequest, reply: FastifyReply) {
     const query = request.query as any;
+    const materiaId = parseInt(query.materiaId);
     const page = parseInt(query.page || '0');
     const size = parseInt(query.size || '10');
-    const nombre = query.nombre;
-    const result = await this.materiaService.list(page, size, nombre);
+    const result = await this.grupoService.listByMateria(materiaId, page, size);
     reply.send(result);
   }
 
@@ -17,18 +17,18 @@ export class MateriaController {
     const params = request.params as any;
     const id = Number(params.id);
     try {
-      const materia = await this.materiaService.getById(id);
-      reply.send(materia);
+      const grupo = await this.grupoService.getById(id);
+      reply.send(grupo);
     } catch (error: any) {
       reply.status(404).send({ error: error.message });
     }
   }
 
   async create(request: FastifyRequest, reply: FastifyReply) {
-    const body = request.body as { clave_materia: string; nombre_materia: string };
+    const body = request.body as { nombre_grupo: string; periodo: string; id_materia: number };
     try {
-      const nueva = await this.materiaService.create(body);
-      reply.status(201).send(nueva);
+      const nuevo = await this.grupoService.create(body);
+      reply.status(201).send(nuevo);
     } catch (error: any) {
       reply.status(400).send({ error: error.message });
     }
@@ -37,9 +37,9 @@ export class MateriaController {
   async update(request: FastifyRequest, reply: FastifyReply) {
     const params = request.params as any;
     const id = Number(params.id);
-    const body = request.body as { clave_materia?: string; nombre_materia?: string };
+    const body = request.body as { nombre_grupo?: string; periodo?: string; id_materia?: number };
     try {
-      const updated = await this.materiaService.update(id, body);
+      const updated = await this.grupoService.update(id, body);
       reply.send(updated);
     } catch (error: any) {
       reply.status(404).send({ error: error.message });
@@ -50,7 +50,7 @@ export class MateriaController {
     const params = request.params as any;
     const id = Number(params.id);
     try {
-      await this.materiaService.delete(id);
+      await this.grupoService.delete(id);
       reply.status(204).send();
     } catch (error: any) {
       reply.status(404).send({ error: error.message });

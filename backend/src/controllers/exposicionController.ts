@@ -1,15 +1,15 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { MateriaService } from '../services/materiaService';
+import { ExposicionService } from '../services/exposicionesService';
 
-export class MateriaController {
-  constructor(private materiaService: MateriaService) {}
+export class ExposicionController {
+  constructor(private exposicionService: ExposicionService) {}
 
-  async list(request: FastifyRequest, reply: FastifyReply) {
+  async listByEquipo(request: FastifyRequest, reply: FastifyReply) {
     const query = request.query as any;
+    const equipoId = parseInt(query.equipoId);
     const page = parseInt(query.page || '0');
     const size = parseInt(query.size || '10');
-    const nombre = query.nombre;
-    const result = await this.materiaService.list(page, size, nombre);
+    const result = await this.exposicionService.listByEquipo(equipoId, page, size);
     reply.send(result);
   }
 
@@ -17,17 +17,17 @@ export class MateriaController {
     const params = request.params as any;
     const id = Number(params.id);
     try {
-      const materia = await this.materiaService.getById(id);
-      reply.send(materia);
+      const exposicion = await this.exposicionService.getById(id);
+      reply.send(exposicion);
     } catch (error: any) {
       reply.status(404).send({ error: error.message });
     }
   }
 
   async create(request: FastifyRequest, reply: FastifyReply) {
-    const body = request.body as { clave_materia: string; nombre_materia: string };
+    const body = request.body as { titulo: string; fecha_exposicion: string; id_equipo: number; rubrica?: any };
     try {
-      const nueva = await this.materiaService.create(body);
+      const nueva = await this.exposicionService.create(body);
       reply.status(201).send(nueva);
     } catch (error: any) {
       reply.status(400).send({ error: error.message });
@@ -37,9 +37,9 @@ export class MateriaController {
   async update(request: FastifyRequest, reply: FastifyReply) {
     const params = request.params as any;
     const id = Number(params.id);
-    const body = request.body as { clave_materia?: string; nombre_materia?: string };
+    const body = request.body as { titulo?: string; fecha_exposicion?: string; rubrica?: any };
     try {
-      const updated = await this.materiaService.update(id, body);
+      const updated = await this.exposicionService.update(id, body);
       reply.send(updated);
     } catch (error: any) {
       reply.status(404).send({ error: error.message });
@@ -50,7 +50,7 @@ export class MateriaController {
     const params = request.params as any;
     const id = Number(params.id);
     try {
-      await this.materiaService.delete(id);
+      await this.exposicionService.delete(id);
       reply.status(204).send();
     } catch (error: any) {
       reply.status(404).send({ error: error.message });
